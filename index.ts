@@ -15,6 +15,13 @@ interface Earthquake {
 		url: string;
 		title: string;
 	}
+	geometry: {
+		coordinates: {
+			0: number;
+			1: number;
+			2: number;
+		}
+	}
 }
 
 function TakeMinutesFromDate(date: Date, minutes: any) {
