@@ -58,16 +58,21 @@ fetch(apiUrl).then(response => {
 	console.log(data.features);
 	data.features.forEach((earthquake: Earthquake) => {
 		let bleatText = "";
+		let description = "";
 		const magnitude = earthquake.properties.mag,
 					time = new Date(earthquake.properties.time),
 					type = earthquake.properties.type,
 					location = earthquake.properties.place,
 					link = earthquake.properties.url,
-					title = earthquake.properties.title;
-		if (time >= TakeMinutesFromDate(now, 90)) {
+					title = earthquake.properties.title,
+					latitude = earthquake.geometry.coordinates[0],
+					longitude = earthquake.geometry.coordinates[1],
+					depth = earthquake.geometry.coordinates[2];
+		if (time >= TakeMinutesFromDate(now, 1)) {
 				bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-For details from the USGS and to report shaking: ${link}`;
-			post(bleatText, link, title);
+For details from the USGS and to report shaking:`;
+				description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
+			post(bleatText, link, title, description);
 		}
 	})
 })
@@ -80,7 +85,7 @@ const agent = new BskyAgent({
 	service: 'https://bsky.social',
 })
 
-async function post(bleat: string, link: string, title: string) {
+async function post(bleat: string, link: string, title: string, description: string) {
 	await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
 	await agent.post({
 		text: bleat,
@@ -102,7 +107,7 @@ async function post(bleat: string, link: string, title: string) {
 			"external": {
 				"uri": link,
 				"title": title + " | USGS",
-				"description": "2024-02-10 08:41:36 (UTC) | 34.055°N 118.875°W | 12.5 km depth",
+				"description": description,
 			}
 		}
 	})
