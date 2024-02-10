@@ -41,45 +41,49 @@ let startTime = fiveMinutesAgo.toISOString();
 const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 console.log(apiUrl);
 
-// Make a GET request
-fetch(apiUrl).then(response => {
-	if (!response.ok) {
-		if (response.status === 404) {
-			throw new Error('Data not found');
-		} else if (response.status === 500) {
-			throw new Error('Server error');
-		} else {
-			throw new Error('Network response was not ok');
+type FetchFunction = (url: string) => void;
+function apiFetch(fn: FetchFunction) {
+	console.log('Fetching data from API')
+	// Make a GET request
+	fetch(apiUrl).then(response => {
+		if (!response.ok) {
+			if (response.status === 404) {
+				throw new Error('Data not found');
+			} else if (response.status === 500) {
+				throw new Error('Server error');
+			} else {
+				throw new Error('Network response was not ok');
+			}
 		}
-	}
-	return response.json();
-})
-.then(data => {
-	console.log(data.features);
-	data.features.forEach((earthquake: Earthquake) => {
-		let bleatText = "";
-		let description = "";
-		const magnitude = earthquake.properties.mag,
-					time = new Date(earthquake.properties.time),
-					type = earthquake.properties.type,
-					location = earthquake.properties.place,
-					link = earthquake.properties.url,
-					title = earthquake.properties.title,
-					latitude = earthquake.geometry.coordinates[0],
-					longitude = earthquake.geometry.coordinates[1],
-					depth = earthquake.geometry.coordinates[2],
-					subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
-		if (time >= TakeMinutesFromDate(now, 1)) {
-				bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-For details from the USGS${subBleat}:`;
-				description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
-			post(bleatText, link, title, description);
-		}
+		return response.json();
 	})
-})
-.catch(error => {
-	console.error('Error:', error);
-});
+	.then(data => {
+		data.features.forEach((earthquake: Earthquake) => {
+			console.log(earthquake.id);
+			let bleatText = "";
+			let description = "";
+			const magnitude = earthquake.properties.mag,
+						time = new Date(earthquake.properties.time),
+						type = earthquake.properties.type,
+						location = earthquake.properties.place,
+						link = earthquake.properties.url,
+						title = earthquake.properties.title,
+						latitude = earthquake.geometry.coordinates[0],
+						longitude = earthquake.geometry.coordinates[1],
+						depth = earthquake.geometry.coordinates[2],
+						subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
+			if (time >= TakeMinutesFromDate(now, 1)) {
+					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+	For details from the USGS${subBleat}:`;
+					description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
+				post(bleatText, link, title, description);
+			}
+		})
+	})
+	.catch(error => {
+		console.error('Error:', error);
+	});
+}
 
 // Create a Bluesky Agent
 const agent = new BskyAgent({
