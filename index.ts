@@ -6,8 +6,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 interface Earthquake {
+	id: string,
 	properties: {
-		id: string;
 		type: string;
 		mag: number;
 		time: number;
