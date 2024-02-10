@@ -39,7 +39,7 @@ let startTime = fiveMinutesAgo.toISOString();
  * Maximum Radius: 100 km
  */
 const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
-console.log(apiUrl);
+console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
