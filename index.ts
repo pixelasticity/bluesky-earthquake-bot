@@ -73,15 +73,34 @@ const agent = new BskyAgent({
 	service: 'https://bsky.social',
 })
 
-async function main() {
+async function post(bleat: string, link: string, title: string) {
 	await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
 	await agent.post({
-		text: ""
+		text: bleat,
+		langs: [ "en-US" ],
+		facets: [
+			{
+				index: {
+					byteStart: 0,
+					byteEnd: 10
+				},
+				features: [{
+					$type: 'app.bsky.richtext.facet#tag',
+					tag: '#earthquake'
+				}]
+			}
+		],
+		embed: {
+			"$type": "app.bsky.embed.external",
+			"external": {
+				"uri": link,
+				"title": title + " | USGS",
+				"description": "2024-02-10 08:41:36 (UTC) | 34.055°N 118.875°W | 12.5 km depth",
+			}
+		}
 	})
 	console.log("Just posted!")
 }
-
-main()
 
 // // Run this on a cron job
 // const scheduleExpressionMinute = '* * * * *'; // Run once every minute for testing
