@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@atproto/api": "^0.9.6",
+    "cron": "^3.1.6",
+    "dotenv": "^16.4.1",
+    "process": "^0.11.10"
+  },
+  "dependencies": {
+    "typescript": "^5.3.3"
+  }
+}
