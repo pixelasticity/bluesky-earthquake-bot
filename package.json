@@ -8,5 +8,9 @@
   },
   "dependencies": {
     "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "install": "npx tsc",
+    "start": "node index.js"
   }
 }
