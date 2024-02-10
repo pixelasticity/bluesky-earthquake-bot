@@ -1,7 +1,7 @@
 import { BskyAgent } from '@atproto/api';
 import * as dotenv from 'dotenv';
-// import { CronJob } from 'cron';
-// import * as process from 'process';
+import { CronJob } from 'cron';
+import * as process from 'process';
 
 dotenv.config();
 
@@ -119,10 +119,10 @@ async function post(bleat: string, link: string, title: string, description: str
 	console.log("Just posted!")
 }
 
-// // Run this on a cron job
-// const scheduleExpressionMinute = '* * * * *'; // Run once every minute for testing
-// const scheduleExpression = '0 */3 * * *'; // Run once every three hours in production
+// Run this on a cron job
+const scheduleExpressionMinute = '* * * * *'; // Run once every minute for testing
+const scheduleExpression = '0 */3 * * *'; // Run once every three hours in production
 
-// const job = new CronJob(scheduleExpression, main); // change to scheduleExpressionMinute for testing
+const job = new CronJob(scheduleExpressionMinute, apiFetch); // change to scheduleExpressionMinute for testing
 
-// job.start();
+job.start();
