@@ -63,10 +63,10 @@ fetch(apiUrl).then(response => {
     data.features.forEach((earthquake) => {
         let bleatText = "";
         let description = "";
-        const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2];
-        if (time >= TakeMinutesFromDate(now, 120)) {
+        const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2], subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
+        if (time >= TakeMinutesFromDate(now, 240)) {
             bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-For details from the USGS and to report shaking: ${link}`;
+For details from the USGS${subBleat}:`;
             description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
             post(bleatText, link, title, description);
         }

@@ -67,10 +67,11 @@ fetch(apiUrl).then(response => {
 					title = earthquake.properties.title,
 					latitude = earthquake.geometry.coordinates[0],
 					longitude = earthquake.geometry.coordinates[1],
-					depth = earthquake.geometry.coordinates[2];
+					depth = earthquake.geometry.coordinates[2],
+					subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
 		if (time >= TakeMinutesFromDate(now, 1)) {
 				bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-For details from the USGS and to report shaking:`;
+For details from the USGS${subBleat}:`;
 				description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
 			post(bleatText, link, title, description);
 		}
