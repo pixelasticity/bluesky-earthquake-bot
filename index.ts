@@ -43,7 +43,7 @@ console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
-	console.log('Fetching data from API')
+	console.log('Fetching data from API:')
 	// Make a GET request
 	fetch(apiUrl).then(response => {
 		if (!response.ok) {
