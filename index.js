@@ -62,11 +62,13 @@ fetch(apiUrl).then(response => {
     console.log(data.features);
     data.features.forEach((earthquake) => {
         let bleatText = "";
-        const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title;
-        if (time >= TakeMinutesFromDate(now, 90)) {
+        let description = "";
+        const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2];
+        if (time >= TakeMinutesFromDate(now, 120)) {
             bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
 For details from the USGS and to report shaking: ${link}`;
-            post(bleatText, link, title);
+            description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
+            post(bleatText, link, title, description);
         }
     });
 })
@@ -77,7 +79,7 @@ For details from the USGS and to report shaking: ${link}`;
 const agent = new api_1.BskyAgent({
     service: 'https://bsky.social',
 });
-async function post(bleat, link, title) {
+async function post(bleat, link, title, description) {
     await agent.login({ identifier: process.env.BLUESKY_USERNAME, password: process.env.BLUESKY_PASSWORD });
     await agent.post({
         text: bleat,
@@ -92,24 +94,14 @@ async function post(bleat, link, title) {
                         $type: 'app.bsky.richtext.facet#tag',
                         tag: '#earthquake'
                     }]
-            },
-            // {
-            // 	index: {
-            // 		byteStart: 6,
-            // 		byteEnd: 15
-            // 	},
-            // 	features: [{
-            // 		$type: 'app.bsky.richtext.facet#link',
-            // 		uri: link
-            // 	}]
-            // }
+            }
         ],
         embed: {
             "$type": "app.bsky.embed.external",
             "external": {
                 "uri": link,
                 "title": title + " | USGS",
-                "description": "2024-02-10 08:41:36 (UTC) | 34.055°N 118.875°W | 12.5 km depth",
+                "description": description,
             }
         }
     });
@@ -120,4 +112,3 @@ async function post(bleat, link, title) {
 // const scheduleExpression = '0 */3 * * *'; // Run once every three hours in production
 // const job = new CronJob(scheduleExpression, main); // change to scheduleExpressionMinute for testing
 // job.start();
-// export {}
