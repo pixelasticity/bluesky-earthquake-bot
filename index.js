@@ -32,7 +32,7 @@ function TakeMinutesFromDate(date, minutes) {
     return new Date(date.getTime() - minutes * 60000);
 }
 let now = new Date();
-let fiveMinutesAgo = TakeMinutesFromDate(now, 600);
+let fiveMinutesAgo = TakeMinutesFromDate(now, 240);
 let startTime = fiveMinutesAgo.toISOString();
 /*
  * Format: geoJSON
@@ -44,6 +44,7 @@ let startTime = fiveMinutesAgo.toISOString();
 const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 console.log('Starting up...');
 function apiFetch(fn) {
+    console.log('Fetching data from API');
     // Make a GET request
     fetch(apiUrl).then(response => {
         if (!response.ok) {

@@ -28,7 +28,7 @@ function TakeMinutesFromDate(date: Date, minutes: any) {
     return new Date(date.getTime() - minutes * 60000);
 }
 let now = new Date();
-let fiveMinutesAgo = TakeMinutesFromDate(now, 600);
+let fiveMinutesAgo = TakeMinutesFromDate(now, 240);
 let startTime = fiveMinutesAgo.toISOString();
 
 /*
