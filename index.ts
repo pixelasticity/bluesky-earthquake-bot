@@ -27,10 +27,15 @@ interface Earthquake {
 function TakeMinutesFromDate(date: Date, minutes: any) {
     return new Date(date.getTime() - minutes * 60000);
 }
-let now = new Date();
-let fiveMinutesAgo = TakeMinutesFromDate(now, 240);
-let startTime = fiveMinutesAgo.toISOString();
 
+console.log('Starting up...');
+
+type FetchFunction = (url: string) => void;
+function apiFetch(fn: FetchFunction) {
+	console.log('Fetching data from API: ', Date.now())
+	let now = new Date();
+	let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
+	let startTime = fiveMinutesAgo.toISOString();
 /*
  * Format: geoJSON
  * Minimum Magnitude: 1.0
@@ -38,12 +43,8 @@ let startTime = fiveMinutesAgo.toISOString();
  * Longitude: -118.27332
  * Maximum Radius: 100 km
  */
-const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
-console.log('Starting up...');
+	const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
-type FetchFunction = (url: string) => void;
-function apiFetch(fn: FetchFunction) {
-	console.log('Fetching data from API:')
 	// Make a GET request
 	fetch(apiUrl).then(response => {
 		if (!response.ok) {
@@ -74,7 +75,7 @@ function apiFetch(fn: FetchFunction) {
 						subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
 			if (time >= TakeMinutesFromDate(now, 1)) {
 					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-	For details from the USGS${subBleat}:`;
+For details from the USGS${subBleat}:`;
 					description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
 				post(bleatText, link, title, description);
 			}

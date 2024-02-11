@@ -31,20 +31,20 @@ dotenv.config();
 function TakeMinutesFromDate(date, minutes) {
     return new Date(date.getTime() - minutes * 60000);
 }
-let now = new Date();
-let fiveMinutesAgo = TakeMinutesFromDate(now, 240);
-let startTime = fiveMinutesAgo.toISOString();
-/*
- * Format: geoJSON
- * Minimum Magnitude: 1.0
- * Latitude: 34.14818
- * Longitude: -118.27332
- * Maximum Radius: 100 km
- */
-const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 console.log('Starting up...');
 function apiFetch(fn) {
-    console.log('Fetching data from API');
+    console.log('Fetching data from API: ', Date.now());
+    let now = new Date();
+    let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
+    let startTime = fiveMinutesAgo.toISOString();
+    /*
+     * Format: geoJSON
+     * Minimum Magnitude: 1.0
+     * Latitude: 34.14818
+     * Longitude: -118.27332
+     * Maximum Radius: 100 km
+     */
+    const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
     // Make a GET request
     fetch(apiUrl).then(response => {
         if (!response.ok) {
@@ -68,7 +68,7 @@ function apiFetch(fn) {
             const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2], subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
             if (time >= TakeMinutesFromDate(now, 1)) {
                 bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
-	For details from the USGS${subBleat}:`;
+For details from the USGS${subBleat}:`;
                 description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
                 post(bleatText, link, title, description);
             }
