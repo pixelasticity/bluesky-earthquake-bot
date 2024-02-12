@@ -76,7 +76,7 @@ function apiFetch(fn: FetchFunction) {
 			if (time >= TakeMinutesFromDate(now, 1)) {
 					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
 For details from the USGS${subBleat}:`;
-					description = `${time.toUTCString()} | ${latitude}°N ${longitude}°W | ${depth} km depth`;
+					description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 				post(bleatText, link, title, description);
 			}
 		})
