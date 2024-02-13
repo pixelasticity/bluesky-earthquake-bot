@@ -1,4 +1,4 @@
-import { BskyAgent } from '@atproto/api';
+import api from '@atproto/api';
 import * as dotenv from 'dotenv';
 
 let lastPostID: String = "";
@@ -8,39 +8,40 @@ function TakeMinutesFromDate(date: Date, minutes: number) {
 }
 
 // Create a Bluesky Agent
+const { BskyAgent } = api;
 const agent = new BskyAgent({
     service: 'https://bsky.social',
 })
 
-// async function post(bleat: string, id: string, link: string, title: string, description: string) {
-//     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
-//     await agent.post({
-//         text: bleat,
-//         langs: [ "en-US" ],
-//         facets: [
-//             {
-//                 index: {
-//                     byteStart: 0,
-//                     byteEnd: 10
-//                 },
-//                 features: [{
-//                     $type: 'app.bsky.richtext.facet#tag',
-//                     tag: '#earthquake'
-//                 }]
-//             }
-//         ],
-//         embed: {
-//             "$type": "app.bsky.embed.external",
-//             "external": {
-//                 "uri": link,
-//                 "title": title + " | USGS",
-//                 "description": description,
-//             }
-//         }
-//     })
-//     console.log("Just posted!")
-//     lastPostID = id
-// }
+async function post(bleat: string, id: string, link: string, title: string, description: string) {
+    await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
+    await agent.post({
+        text: bleat,
+        langs: [ "en-US" ],
+        facets: [
+            {
+                index: {
+                    byteStart: 0,
+                    byteEnd: 10
+                },
+                features: [{
+                    $type: 'app.bsky.richtext.facet#tag',
+                    tag: '#earthquake'
+                }]
+            }
+        ],
+        embed: {
+            "$type": "app.bsky.embed.external",
+            "external": {
+                "uri": link,
+                "title": title + " | USGS",
+                "description": description,
+            }
+        }
+    })
+    console.log("Just posted!")
+    lastPostID = id
+}
 
 export default async () => {
     dotenv.config();
