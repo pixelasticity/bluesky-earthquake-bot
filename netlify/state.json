@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Los Angeles",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "CA",
+				"name": "California"
+			},
+			"timezone": "America/Los_Angeles",
+			"latitude": 34.0138,
+			"longitude": -118.4405
+		},
+		"timestamp": 1707788261957
+	}
+}
