@@ -100,16 +100,16 @@ export default async () => {
                 let bleatText = "";
                 let description = "";
                 const id = earthquake.id,
-                            magnitude = earthquake.properties.mag,
-                            time = new Date(earthquake.properties.time),
-                            type = earthquake.properties.type,
-                            location = earthquake.properties.place,
-                            link = earthquake.properties.url,
-                            title = earthquake.properties.title,
-                            latitude = earthquake.geometry.coordinates[0],
-                            longitude = earthquake.geometry.coordinates[1],
-                            depth = earthquake.geometry.coordinates[2],
-                            subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
+                      magnitude = earthquake.properties.mag,
+                      time = new Date(earthquake.properties.time),
+                      type = earthquake.properties.type,
+                      location = earthquake.properties.place,
+                      link = earthquake.properties.url,
+                      title = earthquake.properties.title,
+                      latitude = earthquake.geometry.coordinates[0],
+                      longitude = earthquake.geometry.coordinates[1],
+                      depth = earthquake.geometry.coordinates[2],
+                      subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
                 if (time >= TakeMinutesFromDate(now, 1)) {
                         bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
     For details from the USGS${subBleat}:`;
