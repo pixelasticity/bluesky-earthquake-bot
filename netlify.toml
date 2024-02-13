@@ -1,2 +1,6 @@
 [functions."scheduled-post"]
 schedule = "* * * * *"
+
+[build]
+  command = "npm run build"
+  functions = "lambda"
