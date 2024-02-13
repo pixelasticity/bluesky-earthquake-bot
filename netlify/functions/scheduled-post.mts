@@ -15,35 +15,35 @@ function TakeMinutesFromDate(date: Date, minutes: number) {
 //     service: 'https://bsky.social',
 // })
 
-async function post(bleat: string, id: string, link: string, title: string, description: string) {
-    await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
-    await agent.post({
-        text: bleat,
-        langs: [ "en-US" ],
-        facets: [
-            {
-                index: {
-                    byteStart: 0,
-                    byteEnd: 10
-                },
-                features: [{
-                    $type: 'app.bsky.richtext.facet#tag',
-                    tag: '#earthquake'
-                }]
-            }
-        ],
-        embed: {
-            "$type": "app.bsky.embed.external",
-            "external": {
-                "uri": link,
-                "title": title + " | USGS",
-                "description": description,
-            }
-        }
-    })
-    console.log("Just posted!")
-    lastPost = id
-}
+// async function post(bleat: string, id: string, link: string, title: string, description: string) {
+//     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
+//     await agent.post({
+//         text: bleat,
+//         langs: [ "en-US" ],
+//         facets: [
+//             {
+//                 index: {
+//                     byteStart: 0,
+//                     byteEnd: 10
+//                 },
+//                 features: [{
+//                     $type: 'app.bsky.richtext.facet#tag',
+//                     tag: '#earthquake'
+//                 }]
+//             }
+//         ],
+//         embed: {
+//             "$type": "app.bsky.embed.external",
+//             "external": {
+//                 "uri": link,
+//                 "title": title + " | USGS",
+//                 "description": description,
+//             }
+//         }
+//     })
+//     console.log("Just posted!")
+//     lastPost = id
+// }
 
 export default async () => {
     dotenv.config();
