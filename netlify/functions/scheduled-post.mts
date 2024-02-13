@@ -82,6 +82,7 @@ export default async () => {
 
     const earthquakes = await fetch(apiUrl)
         .then(response => {
+            console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost)
             if (!response.ok) {
                 if (response.status === 404) {
                     throw new Error('Data not found');
@@ -94,7 +95,6 @@ export default async () => {
             return response.json();
         })
         .then(data => {
-            console.log('Fetching data @ ' + Date.now(), '\n', 'Last post: ' + lastPost)
             data.features.forEach((earthquake: Earthquake) => {
                 console.log(earthquake.id);
                 let bleatText = "";
