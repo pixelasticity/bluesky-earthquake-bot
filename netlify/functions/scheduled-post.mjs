@@ -1,12 +1,13 @@
 import * as dotenv from 'dotenv';
-let lastPost = "";
+import { BskyAgent } from '@atproto/api';
+let lastPostID = "";
 function TakeMinutesFromDate(date, minutes) {
     return new Date(date.getTime() - minutes * 60000);
 }
 // Create a Bluesky Agent
-// const agent = new BskyAgent({
-//     service: 'https://bsky.social',
-// })
+const agent = new BskyAgent({
+    service: 'https://bsky.social',
+});
 // async function post(bleat: string, id: string, link: string, title: string, description: string) {
 //     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
 //     await agent.post({
@@ -34,7 +35,7 @@ function TakeMinutesFromDate(date, minutes) {
 //         }
 //     })
 //     console.log("Just posted!")
-//     lastPost = id
+//     lastPostID = id
 // }
 export default async () => {
     dotenv.config();
@@ -52,7 +53,7 @@ export default async () => {
     const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
     const earthquakes = await fetch(apiUrl)
         .then(response => {
-        console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost);
+        console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPostID);
         if (!response.ok) {
             if (response.status === 404) {
                 throw new Error('Data not found');

@@ -1,18 +1,16 @@
-import { Handler} from '@netlify/functions';
 import * as dotenv from 'dotenv';
-// import { BskyAgent } from '@atproto/api';
-import type { Config } from "@netlify/functions"
+import { BskyAgent } from '@atproto/api';
 
-let lastPost = "";
+let lastPostID: String = "";
 
 function TakeMinutesFromDate(date: Date, minutes: number) {
     return new Date(date.getTime() - minutes * 60000);
 }
 
 // Create a Bluesky Agent
-// const agent = new BskyAgent({
-//     service: 'https://bsky.social',
-// })
+const agent = new BskyAgent({
+    service: 'https://bsky.social',
+})
 
 // async function post(bleat: string, id: string, link: string, title: string, description: string) {
 //     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
@@ -41,7 +39,7 @@ function TakeMinutesFromDate(date: Date, minutes: number) {
 //         }
 //     })
 //     console.log("Just posted!")
-//     lastPost = id
+//     lastPostID = id
 // }
 
 export default async () => {
@@ -82,7 +80,7 @@ export default async () => {
 
     const earthquakes = await fetch(apiUrl)
         .then(response => {
-            console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost)
+            console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPostID)
             if (!response.ok) {
                 if (response.status === 404) {
                     throw new Error('Data not found');
