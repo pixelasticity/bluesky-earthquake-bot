@@ -9,7 +9,7 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "netlify-lambda build src",
+    "build": "npx tsc",
     "check:ts": "tsc --noEmit --lib ES2015 ./src/*.ts",
     "start": "node index.js"
   }
