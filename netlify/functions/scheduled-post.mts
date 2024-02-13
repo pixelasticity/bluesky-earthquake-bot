@@ -1,6 +1,7 @@
-import { BskyAgent } from '@atproto/api';
+import { Handler} from '@netlify/functions';
 import * as dotenv from 'dotenv';
 import * as process from 'process';
+import { BskyAgent } from '@atproto/api';
 import type { Config } from "@netlify/functions"
 
 let lastPost = "";
@@ -44,9 +45,7 @@ async function post(bleat: string, id: string, link: string, title: string, desc
     lastPost = id
 }
 
-export default async (req: Request) => {
-    const { next_run } = await req.json()
-
+export default async () => {
     dotenv.config();
 
     interface Earthquake {
@@ -70,23 +69,20 @@ export default async (req: Request) => {
 
     console.log('Starting up...');
 
-    type FetchFunction = (url: string) => void;
-    function apiFetch(fn: FetchFunction) {
-        console.log('Fetching data @ ' + Date.now(), '\n', 'Last post: ' + lastPost)
-        let now = new Date();
-        let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
-        let startTime = fiveMinutesAgo.toISOString();
-        /*
-         * Format: geoJSON
-         * Minimum Magnitude: 1.0
-         * Latitude: 34.14818
-         * Longitude: -118.27332
-         * Maximum Radius: 100 km
-         */
-        const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
+    let now = new Date();
+    let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
+    let startTime = fiveMinutesAgo.toISOString();
+    /*
+     * Format: geoJSON
+     * Minimum Magnitude: 1.0
+     * Latitude: 34.14818
+     * Longitude: -118.27332
+     * Maximum Radius: 100 km
+     */
+    const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
-        // Make a GET request
-        fetch(apiUrl).then(response => {
+    const earthquakes = await fetch(apiUrl)
+        .then(response => {
             if (!response.ok) {
                 if (response.status === 404) {
                     throw new Error('Data not found');
@@ -99,6 +95,7 @@ export default async (req: Request) => {
             return response.json();
         })
         .then(data => {
+            console.log('Fetching data @ ' + Date.now(), '\n', 'Last post: ' + lastPost)
             data.features.forEach((earthquake: Earthquake) => {
                 console.log(earthquake.id);
                 let bleatText = "";
@@ -118,12 +115,11 @@ export default async (req: Request) => {
                         bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
     For details from the USGS${subBleat}:`;
                         description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
-                    post(bleatText, id, link, title, description);
+                    console.log(bleatText, id, link, title, description);
                 }
             })
         })
         .catch(error => {
             console.error('Error:', error);
         });
-    }
 }
