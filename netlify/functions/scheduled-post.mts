@@ -1,5 +1,5 @@
+import { BskyAgent } from '@atproto/api';
 import * as dotenv from 'dotenv';
-import BskyAgent from '@atproto/api';
 
 let lastPostID: String = "";
 
