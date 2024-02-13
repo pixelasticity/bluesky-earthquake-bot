@@ -1,6 +1,5 @@
 import { Handler} from '@netlify/functions';
 import * as dotenv from 'dotenv';
-import * as process from 'process';
 // import { BskyAgent } from '@atproto/api';
 import type { Config } from "@netlify/functions"
 
