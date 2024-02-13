@@ -1,7 +1,7 @@
 import { Handler} from '@netlify/functions';
 import * as dotenv from 'dotenv';
 import * as process from 'process';
-import { BskyAgent } from '@atproto/api';
+// import { BskyAgent } from '@atproto/api';
 import type { Config } from "@netlify/functions"
 
 let lastPost = "";
@@ -11,9 +11,9 @@ function TakeMinutesFromDate(date: Date, minutes: number) {
 }
 
 // Create a Bluesky Agent
-const agent = new BskyAgent({
-    service: 'https://bsky.social',
-})
+// const agent = new BskyAgent({
+//     service: 'https://bsky.social',
+// })
 
 async function post(bleat: string, id: string, link: string, title: string, description: string) {
     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
