@@ -67,9 +67,9 @@ export default async () => {
 
     console.log('Starting up...');
 
-    let now = new Date();
     let fiveMinutesAgo = TakeMinutesFromDate(now, 720);
     let startTime = fiveMinutesAgo.toISOString();
+    let now: Date = new Date();
     /*
      * Format: geoJSON
      * Minimum Magnitude: 1.0
