@@ -95,7 +95,6 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
-                console.log(earthquake.id);
                 let bleatText = "";
                 let description = "";
                 const id = earthquake.id,
@@ -109,7 +108,7 @@ export default async () => {
                       longitude = earthquake.geometry.coordinates[1],
                       depth = earthquake.geometry.coordinates[2],
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                console.log(time, TakeMinutesFromDate(now, 270));
+                console.log('ID: %s, Time: %s, 270 minutes ago: %s', earthquake.id, time.toLocaleTimeString('en-US'), TakeMinutesFromDate(now, 270).toLocaleTimeString('en-US'));
                 if (time >= TakeMinutesFromDate(now, 270)) {
                         bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
     For details from the USGS${subBleat}:`;
