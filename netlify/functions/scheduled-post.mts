@@ -114,6 +114,7 @@ For details from the USGS${subBleat}:`;
                     description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     post(bleatText, id, link, title, description);
                 } else {
+                    console.log(time.getTime(), TakeMinutesFromDate(now, 1.75).getTime());
                     return
                 }
             })
