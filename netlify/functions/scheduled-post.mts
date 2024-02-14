@@ -68,7 +68,7 @@ export default async () => {
     console.log('Starting up...');
 
     let now = new Date();
-    let fiveMinutesAgo = TakeMinutesFromDate(now, 2400);
+    let fiveMinutesAgo = TakeMinutesFromDate(now, 720);
     let startTime = fiveMinutesAgo.toISOString();
     /*
      * Format: geoJSON
@@ -108,8 +108,8 @@ export default async () => {
                       longitude = earthquake.geometry.coordinates[1],
                       depth = earthquake.geometry.coordinates[2],
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                console.log('ID: %s, Time: %s, 270 minutes ago: %s', earthquake.id, time.toLocaleTimeString('en-US'), TakeMinutesFromDate(now, 270).toLocaleTimeString('en-US'));
-                if (time >= TakeMinutesFromDate(now, 270)) {
+                console.log('ID: %s, Time: %s, 270 minutes ago: %s', earthquake.id, time.toLocaleTimeString('en-US'), TakeMinutesFromDate(now, 330).toLocaleTimeString('en-US'));
+                if (time >= TakeMinutesFromDate(now, 330)) {
                         bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
     For details from the USGS${subBleat}:`;
                         description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
