@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@netlify/functions": "^2.5.1",
+    "dayjs": "^1.11.10",
     "typescript": "^5.3.3"
   },
   "scripts": {
