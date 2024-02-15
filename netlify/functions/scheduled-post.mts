@@ -56,6 +56,7 @@ export default async () => {
             place: string;
             url: string;
             title: string;
+            sig: number;
         }
         geometry: {
             coordinates: {
@@ -110,6 +111,7 @@ export default async () => {
                       latitude = earthquake.geometry.coordinates[0],
                       longitude = earthquake.geometry.coordinates[1],
                       depth = earthquake.geometry.coordinates[2],
+                      significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
                 if (updated.getTime() >= TakeMinutesFromDate(now, 1.75).getTime()) {
                     bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
