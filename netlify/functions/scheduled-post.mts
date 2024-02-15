@@ -1,7 +1,7 @@
 import api from '@atproto/api';
 import * as dotenv from 'dotenv';
 
-let lastPostID: String = "";
+let lastPostID: string = "";
 
 function TakeMinutesFromDate(date: Date, minutes: number) {
     return new Date(date.getTime() - minutes * 60000);
