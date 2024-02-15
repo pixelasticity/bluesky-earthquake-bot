@@ -109,7 +109,7 @@ export default async () => {
                       longitude = earthquake.geometry.coordinates[1],
                       depth = earthquake.geometry.coordinates[2],
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (time.getTime() >= TakeMinutesFromDate(now, 1.75).getTime()) {
+                if (time.getTime() >= TakeMinutesFromDate(now, 2.75).getTime()) {
                     bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
 For details from the USGS${subBleat}:`;
                     description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
