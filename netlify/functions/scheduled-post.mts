@@ -52,6 +52,7 @@ export default async () => {
             type: string;
             mag: number;
             time: number;
+            updated: number;
             place: string;
             url: string;
             title: string;
@@ -101,6 +102,7 @@ export default async () => {
                 const id = earthquake.id,
                       magnitude = earthquake.properties.mag,
                       time = new Date(earthquake.properties.time),
+                      updated = new Date(earthquake.properties.updated),
                       type = earthquake.properties.type,
                       location = earthquake.properties.place,
                       link = earthquake.properties.url,
@@ -109,7 +111,7 @@ export default async () => {
                       longitude = earthquake.geometry.coordinates[1],
                       depth = earthquake.geometry.coordinates[2],
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (time.getTime() >= TakeMinutesFromDate(now, 2.75).getTime()) {
+                if (updated.getTime() >= TakeMinutesFromDate(now, 1.75).getTime()) {
                     bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
 For details from the USGS${subBleat}:`;
                     description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
