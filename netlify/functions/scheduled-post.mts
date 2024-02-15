@@ -95,6 +95,7 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
+                now = new Date();
                 let bleatText = "";
                 let description = "";
                 const id = earthquake.id,
