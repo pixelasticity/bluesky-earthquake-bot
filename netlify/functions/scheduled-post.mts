@@ -1,8 +1,8 @@
 import api from '@atproto/api';
 import * as dotenv from 'dotenv';
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-const timezone = require('dayjs/plugin/timezone');
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -73,11 +73,15 @@ export default async () => {
             }
         }
     }
+}
+
+export default async () => {
+    dotenv.config();
 
     console.log('Starting up...');
 
-    let now: Date = new Date();
-    let twelveHoursAgo = TakeMinutesFromDate(now, 720);
+    let now = dayjs();
+    let twelveHoursAgo = dayjs().subtract(720, 'minute');
     let startTime = twelveHoursAgo.toISOString();
     /*
      * Format: geoJSON
@@ -104,13 +108,13 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
-                now = new Date();
+                now = dayjs();
                 let bleatText = "";
                 let description = "";
                 const id = earthquake.id,
                       magnitude = earthquake.properties.mag,
-                      time = new Date(earthquake.properties.time),
-                      updated = new Date(earthquake.properties.updated),
+                      time = dayjs(earthquake.properties.time).utc(),
+                      updated = dayjs(earthquake.properties.updated).utc(),
                       type = earthquake.properties.type,
                       location = earthquake.properties.place,
                       link = earthquake.properties.url,
@@ -120,13 +124,12 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.getTime() >= TakeMinutesFromDate(now, 1.95).getTime()) {
-                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US', {timeZone: 'America/Los_Angeles'})}.
+                if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
 For details from the USGS${subBleat}:`;
-                    description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+                    description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     post(bleatText, id, link, title, description);
                 } else {
-                    console.log(time.getTime(), TakeMinutesFromDate(now, 1.75).getTime());
                     return
                 }
             })
