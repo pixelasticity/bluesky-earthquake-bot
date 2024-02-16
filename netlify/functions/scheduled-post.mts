@@ -1,11 +1,16 @@
 import api from '@atproto/api';
 import * as dotenv from 'dotenv';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import localizedFormat from 'dayjs/plugin/localizedFormat.js';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(localizedFormat);
+
+const tz: string = "America/Los_Angeles";
 let lastPostID: string = "";
-
-function TakeMinutesFromDate(date: Date, minutes: number) {
-    return new Date(date.getTime() - minutes * 60000);
-}
 
 // Create a Bluesky Agent
 const { BskyAgent } = api;
@@ -43,34 +48,34 @@ async function post(bleat: string, id: string, link: string, title: string, desc
     lastPostID = id
 }
 
+interface Earthquake {
+    id: string,
+    properties: {
+        type: string;
+        mag: number;
+        time: number;
+        updated: number;
+        place: string;
+        url: string;
+        title: string;
+        sig: number;
+    }
+    geometry: {
+        coordinates: {
+            0: number;
+            1: number;
+            2: number;
+        }
+    }
+}
+
 export default async () => {
     dotenv.config();
 
-    interface Earthquake {
-        id: string,
-        properties: {
-            type: string;
-            mag: number;
-            time: number;
-            updated: number;
-            place: string;
-            url: string;
-            title: string;
-            sig: number;
-        }
-        geometry: {
-            coordinates: {
-                0: number;
-                1: number;
-                2: number;
-            }
-        }
-    }
-
     console.log('Starting up...');
 
-    let now: Date = new Date();
-    let twelveHoursAgo = TakeMinutesFromDate(now, 720);
+    let now = dayjs();
+    let twelveHoursAgo = dayjs().subtract(720, 'minute');
     let startTime = twelveHoursAgo.toISOString();
     /*
      * Format: geoJSON
@@ -97,13 +102,13 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
-                now = new Date();
+                now = dayjs();
                 let bleatText = "";
                 let description = "";
                 const id = earthquake.id,
                       magnitude = earthquake.properties.mag,
-                      time = new Date(earthquake.properties.time),
-                      updated = new Date(earthquake.properties.updated),
+                      time = dayjs(earthquake.properties.time).utc(),
+                      updated = dayjs(earthquake.properties.updated).utc(),
                       type = earthquake.properties.type,
                       location = earthquake.properties.place,
                       link = earthquake.properties.url,
@@ -113,13 +118,12 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.getTime() >= TakeMinutesFromDate(now, 1.75).getTime()) {
-                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+                if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
 For details from the USGS${subBleat}:`;
-                    description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+                    description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     post(bleatText, id, link, title, description);
                 } else {
-                    console.log(time.getTime(), TakeMinutesFromDate(now, 1.75).getTime());
                     return
                 }
             })
