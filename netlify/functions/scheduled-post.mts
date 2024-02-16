@@ -1,6 +1,8 @@
 import api from '@atproto/api';
 import * as dotenv from 'dotenv';
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 
 let lastPostID: string = "";
 
