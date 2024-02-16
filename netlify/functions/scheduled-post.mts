@@ -1,5 +1,6 @@
 import api from '@atproto/api';
 import * as dotenv from 'dotenv';
+const dayjs = require('dayjs');
 
 let lastPostID: string = "";
 
