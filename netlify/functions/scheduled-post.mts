@@ -48,27 +48,23 @@ async function post(bleat: string, id: string, link: string, title: string, desc
     lastPostID = id
 }
 
-export default async () => {
-    dotenv.config();
-
-    interface Earthquake {
-        id: string,
-        properties: {
-            type: string;
-            mag: number;
-            time: number;
-            updated: number;
-            place: string;
-            url: string;
-            title: string;
-            sig: number;
-        }
-        geometry: {
-            coordinates: {
-                0: number;
-                1: number;
-                2: number;
-            }
+interface Earthquake {
+    id: string,
+    properties: {
+        type: string;
+        mag: number;
+        time: number;
+        updated: number;
+        place: string;
+        url: string;
+        title: string;
+        sig: number;
+    }
+    geometry: {
+        coordinates: {
+            0: number;
+            1: number;
+            2: number;
         }
     }
 }
