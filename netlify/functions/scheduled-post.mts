@@ -10,10 +10,6 @@ dayjs.extend(timezone);
 const tz: string = "America/Los_Angeles";
 let lastPostID: string = "";
 
-function TakeMinutesFromDate(date: Date, minutes: number) {
-    return new Date(date.getTime() - minutes * 60000);
-}
-
 // Create a Bluesky Agent
 const { BskyAgent } = api;
 const agent = new BskyAgent({
