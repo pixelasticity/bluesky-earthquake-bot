@@ -120,8 +120,8 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.getTime() >= TakeMinutesFromDate(now, 1.75).getTime()) {
-                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+                if (updated.getTime() >= TakeMinutesFromDate(now, 1.95).getTime()) {
+                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US', {timeZone: 'America/Los_Angeles'})}.
 For details from the USGS${subBleat}:`;
                     description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     post(bleatText, id, link, title, description);
