@@ -6,6 +6,8 @@ const timezone = require('dayjs/plugin/timezone');
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+const tz: string = "America/Los_Angeles";
 let lastPostID: string = "";
 
 function TakeMinutesFromDate(date: Date, minutes: number) {
