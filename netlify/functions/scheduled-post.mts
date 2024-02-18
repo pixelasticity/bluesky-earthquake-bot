@@ -132,4 +132,6 @@ For details from the USGS${subBleat}:`;
         .catch(error => {
             console.error('Error:', error);
         });
+
+    return new Response("Ok");
 }
