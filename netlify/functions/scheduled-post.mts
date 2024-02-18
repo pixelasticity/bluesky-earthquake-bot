@@ -118,7 +118,8 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                if (updated.isAfter(now.subtract(1.95, 'minute')) && id != lastPostID) {
+                    console.log(updated.toDate())
                     bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
 For details from the USGS${subBleat}:`;
                     description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
@@ -131,4 +132,6 @@ For details from the USGS${subBleat}:`;
         .catch(error => {
             console.error('Error:', error);
         });
+
+    return new Response("Ok");
 }
