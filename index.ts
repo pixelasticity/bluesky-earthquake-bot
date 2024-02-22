@@ -40,7 +40,7 @@ console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
-	console.log('Fetching data from API: ', Date.now())
+	console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost)
 	let now = dayjs();
 	let fiveMinutesAgo = dayjs(now).subtract(1440, 'minute')
 	let startTime: string = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
