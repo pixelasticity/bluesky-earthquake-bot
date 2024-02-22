@@ -87,6 +87,9 @@ export default async () => {
      */
     const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
+    let bleatText: string = "";
+    let description: string = "";
+
     const earthquakes = await fetch(apiUrl)
         .then(response => {
             console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPostID)
@@ -103,9 +106,6 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
-                now = dayjs();
-                let bleatText = "";
-                let description = "";
                 const id = earthquake.id,
                       magnitude = earthquake.properties.mag,
                       time = dayjs(earthquake.properties.time).utc(),
