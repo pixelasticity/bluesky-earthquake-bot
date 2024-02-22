@@ -35,18 +35,15 @@ interface Earthquake {
 	}
 }
 
-function TakeMinutesFromDate(date: Date, minutes: any) {
-    return new Date(date.getTime() - minutes * 60000);
-}
 
 console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
 	console.log('Fetching data from API: ', Date.now())
-	let now = new Date();
-	let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
-	let startTime = fiveMinutesAgo.toISOString();
+	let now = dayjs();
+	let fiveMinutesAgo = dayjs(now).subtract(1440, 'minute')
+	let startTime: string = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
 /*
  * Format: geoJSON
  * Minimum Magnitude: 1.0
@@ -76,6 +73,7 @@ function apiFetch(fn: FetchFunction) {
 			let description = "";
 			const magnitude = earthquake.properties.mag,
 						time = new Date(earthquake.properties.time),
+						time = dayjs(earthquake.properties.time),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
 						link = earthquake.properties.url,
@@ -84,11 +82,13 @@ function apiFetch(fn: FetchFunction) {
 						longitude = earthquake.geometry.coordinates[1],
 						depth = earthquake.geometry.coordinates[2],
 						subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
-			if (time >= TakeMinutesFromDate(now, 1)) {
-					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+			if (time.valueOf() >= dayjs().subtract(10, 'minute').valueOf() && ) {
+					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz)}.
 For details from the USGS${subBleat}:`;
-					description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
-				post(bleatText, link, title, description);
+					description = `${time.utc().format()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+				post(bleatText, id, link, title, description);
+			} else {
+				console.log(time.tz(tz).format('YYYY-MM-DD HH:mm:ss (UTC)'), time.utc().format());
 			}
 		})
 	})
