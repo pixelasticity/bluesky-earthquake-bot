@@ -16,11 +16,12 @@ const tz = "America/Los_Angeles";
 interface Earthquake {
 	id: string,
 	properties: {
-		type: string;
 		mag: number;
-		time: number;
 		place: string;
+		time: number;
+		updated: number;
 		url: string;
+		type: string;
 		title: string;
 	}
 	geometry: {
