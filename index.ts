@@ -21,6 +21,8 @@ interface Earthquake {
 		time: number;
 		updated: number;
 		url: string;
+		sig: number;
+		code: string;
 		type: string;
 		title: string;
 	}
