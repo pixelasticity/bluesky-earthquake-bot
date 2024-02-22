@@ -51,7 +51,7 @@ function apiFetch(fn: FetchFunction) {
  * Longitude: -118.27332
  * Maximum Radius: 100 km
  */
-	const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
+	const apiUrl: string = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
 	// Make a GET request
 	fetch(apiUrl).then(response => {
@@ -64,15 +64,15 @@ function apiFetch(fn: FetchFunction) {
 				throw new Error('Network response was not ok');
 			}
 		}
-		return response.json();
+		return response.json() as Promise<any>;
 	})
 	.then(data => {
 		data.features.forEach((earthquake: Earthquake) => {
 			console.log(earthquake.id);
-			let bleatText = "";
-			let description = "";
 			const magnitude = earthquake.properties.mag,
 						time = new Date(earthquake.properties.time),
+			let bleatText: string = "";
+			let description: string = "";
 						time = dayjs(earthquake.properties.time),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
@@ -81,7 +81,7 @@ function apiFetch(fn: FetchFunction) {
 						latitude = earthquake.geometry.coordinates[0],
 						longitude = earthquake.geometry.coordinates[1],
 						depth = earthquake.geometry.coordinates[2],
-						subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
+						subBleat: string = (magnitude >= 2.5 ? ' and to report shaking': '');
 			if (time.valueOf() >= dayjs().subtract(10, 'minute').valueOf() && ) {
 					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz)}.
 For details from the USGS${subBleat}:`;
@@ -102,7 +102,7 @@ const agent = new BskyAgent({
 	service: 'https://bsky.social',
 })
 
-async function post(bleat: string, link: string, title: string, description: string) {
+async function post(bleat: string, id: string, link: string, title: string, description: string) {
 	await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
 	await agent.post({
 		text: bleat,
