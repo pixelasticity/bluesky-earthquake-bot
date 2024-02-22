@@ -69,10 +69,11 @@ function apiFetch(fn: FetchFunction) {
 	.then(data => {
 		data.features.forEach((earthquake: Earthquake) => {
 			console.log(earthquake.id);
-			const magnitude = earthquake.properties.mag,
-						time = new Date(earthquake.properties.time),
 			let bleatText: string = "";
 			let description: string = "";
+			const id = earthquake.id,
+					  code = earthquake.properties.code,
+						magnitude = earthquake.properties.mag,
 						time = dayjs(earthquake.properties.time),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
