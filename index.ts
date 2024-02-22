@@ -2,8 +2,14 @@ import { BskyAgent } from '@atproto/api';
 import * as dotenv from 'dotenv';
 import { CronJob } from 'cron';
 import * as process from 'process';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 dotenv.config();
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface Earthquake {
 	id: string,
