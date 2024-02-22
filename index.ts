@@ -11,6 +11,8 @@ dotenv.config();
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const tz = "America/Los_Angeles";
+
 interface Earthquake {
 	id: string,
 	properties: {
