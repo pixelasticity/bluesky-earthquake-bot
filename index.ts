@@ -73,7 +73,7 @@ function apiFetch(fn: FetchFunction) {
 			let bleatText: string = "";
 			let description: string = "";
 			const id = earthquake.id,
-					  code = earthquake.properties.code,
+						code = earthquake.properties.code,
 						magnitude = earthquake.properties.mag,
 						time = dayjs(earthquake.properties.time),
 						type = earthquake.properties.type,
