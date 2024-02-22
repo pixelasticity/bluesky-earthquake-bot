@@ -51,14 +51,14 @@ async function post(bleat: string, id: string, link: string, title: string, desc
 interface Earthquake {
     id: string,
     properties: {
-        type: string;
         mag: number;
+        place: string;
         time: number;
         updated: number;
-        place: string;
         url: string;
-        title: string;
         sig: number;
+        type: string;
+        title: string;
     }
     geometry: {
         coordinates: {
