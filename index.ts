@@ -35,6 +35,7 @@ interface Earthquake {
 	}
 }
 
+let lastPost: string = "unknown";
 
 console.log('Starting up...');
 
@@ -130,6 +131,7 @@ async function post(bleat: string, id: string, link: string, title: string, desc
 		}
 	})
 	console.log("Just posted!")
+	lastPost = id
 }
 
 // Run this on a cron job
