@@ -28,7 +28,7 @@ async function post(bleat: string, id: number, link: string, title: string, desc
             {
                 index: {
                     byteStart: 0,
-                    byteEnd: 10
+                    byteEnd: 11
                 },
                 features: [{
                     $type: 'app.bsky.richtext.facet#tag',
@@ -123,7 +123,7 @@ export default async () => {
                 if (updated.isAfter(now.subtract(1.95, 'minute'))) {
                     if (lastPostID != undefined && id > lastPostID) {
                         console.log(updated.toDate())
-                        bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
+                        bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
     For details from the USGS${subBleat}:`;
                         description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                         post(bleatText, id, link, title, description);
