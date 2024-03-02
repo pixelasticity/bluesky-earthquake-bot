@@ -11,7 +11,7 @@ dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 
 const tz: string = "America/Los_Angeles";
-let lastPostID: string = "";
+let lastPostID: (number | undefined) = undefined;
 
 // Create a Bluesky Agent
 const { BskyAgent } = api;
