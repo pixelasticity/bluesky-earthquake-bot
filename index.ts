@@ -5,25 +5,26 @@ import * as process from 'process';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat.js';
+import { open } from 'fs/promises';
+import path from 'path';
 
 dotenv.config();
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(localizedFormat);
 
-const tz = "America/Los_Angeles";
+const tz: string = "America/Los_Angeles";
 
 interface Earthquake {
 	id: string,
 	properties: {
-		mag: number;
-		place: string;
-		time: number;
-		updated: number;
-		url: string;
-		sig: number;
-		code: string;
 		type: string;
+		mag: number;
+		time: number;
+		place: string;
+		url: string;
 		title: string;
 	}
 	geometry: {
@@ -33,6 +34,18 @@ interface Earthquake {
 			2: number;
 		}
 	}
+}
+
+async function openFile(filePath, data) {
+	console.log(filePath);
+  try {
+    const file = await open(filePath, 'w');
+		await file.read()
+    // await file.write(data);
+    console.log(`Opened file ${filePath}`);
+  } catch (error: any) {
+    console.error(`Got an error trying to open the file: ${error.message}`);
+  }
 }
 
 let lastPost: string = "unknown";
@@ -45,6 +58,7 @@ function apiFetch(fn: FetchFunction) {
 	let now = dayjs();
 	let fiveMinutesAgo = dayjs(now).subtract(1440, 'minute')
 	let startTime: string = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
+	openFile( __dirname + '/tmp/already-posted.json', 'Do homework' );
 /*
  * Format: geoJSON
  * Minimum Magnitude: 1.0
@@ -52,7 +66,7 @@ function apiFetch(fn: FetchFunction) {
  * Longitude: -118.27332
  * Maximum Radius: 100 km
  */
-	const apiUrl: string = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
+	const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
 	// Make a GET request
 	fetch(apiUrl).then(response => {
@@ -65,17 +79,15 @@ function apiFetch(fn: FetchFunction) {
 				throw new Error('Network response was not ok');
 			}
 		}
-		return response.json() as Promise<any>;
+		return response.json();
 	})
 	.then(data => {
 		data.features.forEach((earthquake: Earthquake) => {
 			console.log(earthquake.id);
-			let bleatText: string = "";
-			let description: string = "";
-			const id = earthquake.id,
-						code = earthquake.properties.code,
-						magnitude = earthquake.properties.mag,
-						time = dayjs(earthquake.properties.time),
+			let bleatText = "";
+			let description = "";
+			const magnitude = earthquake.properties.mag,
+						time = dayjs(earthquake.properties.time).utc(),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
 						link = earthquake.properties.url,
@@ -84,13 +96,11 @@ function apiFetch(fn: FetchFunction) {
 						longitude = earthquake.geometry.coordinates[1],
 						depth = earthquake.geometry.coordinates[2],
 						subBleat: string = (magnitude >= 2.5 ? ' and to report shaking': '');
-			if (time.valueOf() >= dayjs().subtract(10, 'minute').valueOf() && ) {
+			if (time.valueOf() >= dayjs().subtract(10, 'minute').valueOf()) {
 					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz)}.
 For details from the USGS${subBleat}:`;
-					description = `${time.utc().format()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
-				post(bleatText, id, link, title, description);
-			} else {
-				console.log(time.tz(tz).format('YYYY-MM-DD HH:mm:ss (UTC)'), time.utc().format());
+					description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+				post(bleatText, link, title, description);
 			}
 		})
 	})
@@ -104,7 +114,7 @@ const agent = new BskyAgent({
 	service: 'https://bsky.social',
 })
 
-async function post(bleat: string, id: string, link: string, title: string, description: string) {
+async function post(bleat: string, link: string, title: string, description: string) {
 	await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
 	await agent.post({
 		text: bleat,
@@ -131,7 +141,6 @@ async function post(bleat: string, id: string, link: string, title: string, desc
 		}
 	})
 	console.log("Just posted!")
-	lastPost = id
 }
 
 // Run this on a cron job
