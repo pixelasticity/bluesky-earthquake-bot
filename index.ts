@@ -2,8 +2,20 @@ import { BskyAgent } from '@atproto/api';
 import * as dotenv from 'dotenv';
 import { CronJob } from 'cron';
 import * as process from 'process';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat.js';
+import { open } from 'fs/promises';
+import path from 'path';
 
 dotenv.config();
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(localizedFormat);
+
+const tz: string = "America/Los_Angeles";
 
 interface Earthquake {
 	id: string,
@@ -24,18 +36,29 @@ interface Earthquake {
 	}
 }
 
-function TakeMinutesFromDate(date: Date, minutes: any) {
-    return new Date(date.getTime() - minutes * 60000);
+async function openFile(filePath, data) {
+	console.log(filePath);
+  try {
+    const file = await open(filePath, 'w');
+		await file.read()
+    // await file.write(data);
+    console.log(`Opened file ${filePath}`);
+  } catch (error: any) {
+    console.error(`Got an error trying to open the file: ${error.message}`);
+  }
 }
+
+let lastPost: string = "unknown";
 
 console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
-	console.log('Fetching data from API: ', Date.now())
-	let now = new Date();
-	let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
-	let startTime = fiveMinutesAgo.toISOString();
+	console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost)
+	let now = dayjs();
+	let fiveMinutesAgo = dayjs(now).subtract(1440, 'minute')
+	let startTime: string = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
+	openFile( __dirname + '/tmp/already-posted.json', 'Do homework' );
 /*
  * Format: geoJSON
  * Minimum Magnitude: 1.0
@@ -64,7 +87,7 @@ function apiFetch(fn: FetchFunction) {
 			let bleatText = "";
 			let description = "";
 			const magnitude = earthquake.properties.mag,
-						time = new Date(earthquake.properties.time),
+						time = dayjs(earthquake.properties.time).utc(),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
 						link = earthquake.properties.url,
@@ -72,11 +95,11 @@ function apiFetch(fn: FetchFunction) {
 						latitude = earthquake.geometry.coordinates[0],
 						longitude = earthquake.geometry.coordinates[1],
 						depth = earthquake.geometry.coordinates[2],
-						subBleat = (magnitude >= 2.5 ? ' and to report shaking': '')
-			if (time >= TakeMinutesFromDate(now, 1)) {
-					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+						subBleat: string = (magnitude >= 2.5 ? ' and to report shaking': '');
+			if (time.valueOf() >= dayjs().subtract(10, 'minute').valueOf()) {
+					bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz)}.
 For details from the USGS${subBleat}:`;
-					description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+					description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 				post(bleatText, link, title, description);
 			}
 		})

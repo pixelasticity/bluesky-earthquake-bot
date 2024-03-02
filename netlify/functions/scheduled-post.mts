@@ -4,13 +4,14 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import localizedFormat from 'dayjs/plugin/localizedFormat.js';
+import process from 'process';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 
 const tz: string = "America/Los_Angeles";
-let lastPostID: string = "";
+let lastPostID: (number | undefined) = undefined;
 
 // Create a Bluesky Agent
 const { BskyAgent } = api;
@@ -18,7 +19,7 @@ const agent = new BskyAgent({
     service: 'https://bsky.social',
 })
 
-async function post(bleat: string, id: string, link: string, title: string, description: string) {
+async function post(bleat: string, id: number, link: string, title: string, description: string) {
     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
     await agent.post({
         text: bleat,
@@ -51,14 +52,15 @@ async function post(bleat: string, id: string, link: string, title: string, desc
 interface Earthquake {
     id: string,
     properties: {
-        type: string;
         mag: number;
+        place: string;
         time: number;
         updated: number;
-        place: string;
         url: string;
-        title: string;
         sig: number;
+        code: string;
+        type: string;
+        title: string;
     }
     geometry: {
         coordinates: {
@@ -86,6 +88,9 @@ export default async () => {
      */
     const apiUrl = "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=" + startTime;
 
+    let bleatText: string = "";
+    let description: string = "";
+
     const earthquakes = await fetch(apiUrl)
         .then(response => {
             console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPostID)
@@ -102,10 +107,7 @@ export default async () => {
         })
         .then(data => {
             data.features.forEach((earthquake: Earthquake) => {
-                now = dayjs();
-                let bleatText = "";
-                let description = "";
-                const id = earthquake.id,
+                const id = parseInt(earthquake.properties.code),
                       magnitude = earthquake.properties.mag,
                       time = dayjs(earthquake.properties.time).utc(),
                       updated = dayjs(earthquake.properties.updated).utc(),
@@ -118,12 +120,14 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.isAfter(now.subtract(1.95, 'minute')) && id != lastPostID) {
-                    console.log(updated.toDate())
-                    bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
-For details from the USGS${subBleat}:`;
-                    description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
-                    post(bleatText, id, link, title, description);
+                if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                    if (lastPostID != undefined && id > lastPostID) {
+                        console.log(updated.toDate())
+                        bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
+    For details from the USGS${subBleat}:`;
+                        description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+                        post(bleatText, id, link, title, description);
+                    }
                 } else {
                     return
                 }
