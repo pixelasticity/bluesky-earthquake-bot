@@ -40,7 +40,7 @@ async function post(bleat: string, id: number, link: string, title: string, desc
             "$type": "app.bsky.embed.external",
             "external": {
                 "uri": link,
-                "title": title + " | USGS",
+                "title": title + " | " + id,
                 "description": description,
             }
         }
