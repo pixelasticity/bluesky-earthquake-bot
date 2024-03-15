@@ -121,7 +121,9 @@ export default async () => {
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
                 if (updated.isAfter(now.subtract(1.95, 'minute'))) {
-                    if (lastPostID != undefined && id > lastPostID) {
+                    if (magnitude < 2.5 && type !== 'earthquake') {
+                        return;
+                    } else if (lastPostID != undefined && id > lastPostID) {
                         console.log(updated.toDate())
                         bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
     For details from the USGS${subBleat}:`;
