@@ -120,24 +120,29 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
-                if (updated.isAfter(now.subtract(1.95, 'minute'))) {
-                    if (magnitude < 2.5 && type !== 'earthquake') {
-                        return;
-                    } else if (lastPostID != undefined && id > lastPostID) {
+                if (type !== 'earthquake' && magnitude < 2.5) {
+                    // Don't post quarry blasts likely felt by no one
+                    return;
+                } else if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                    if (lastPostID != undefined && id > lastPostID) {
                         console.log(updated.toDate())
                         bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
     For details from the USGS${subBleat}:`;
                         description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                         post(bleatText, id, link, title, description);
-                    }
-                } else if (lastPostID == undefined) {
-                    console.log(updated.toDate())
-                    bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
+                    } else if (lastPostID == undefined) {
+                        console.log(updated.toDate())
+                        bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
 For details from the USGS${subBleat}:`;
-                    description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
-                    post(bleatText, id, link, title, description);
+                        description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+                        post(bleatText, id, link, title, description);
+                    } else {
+                        // Nothing to post
+                        return;
+                    }
                 } else {
-                    return
+                    // Don't post anything if there are no recent events
+                    return;
                 }
             })
         })
