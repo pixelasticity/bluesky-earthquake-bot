@@ -123,7 +123,7 @@ export default async () => {
                 if (type !== 'earthquake' && magnitude < 2.5) {
                     // Don't post quarry blasts likely felt by no one
                     return;
-                } else if (updated.isAfter(now.subtract(1.95, 'minute'))) {
+                } else if (time.isAfter(now.subtract(14.95, 'minute'))) {
                     if (lastPostID != undefined && id > lastPostID) {
                         console.log(updated.toDate())
                         bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
