@@ -120,6 +120,15 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
+                let   category: string = '';
+                if (magnitude >= 8) { category = 'great'; } else
+                if (magnitude >= 7) { category = 'major'; } else
+                if (magnitude >= 6) { category = 'strong'; } else
+                if (magnitude >= 5) { category = 'moderate'; } else
+                if (magnitude >= 4) { category = 'light'; } else
+                if (magnitude >= 2.5) { category = 'minor'; } else
+                if (magnitude < 2.5) { category = 'micro'; } else
+                { return; }
                 if (type !== 'earthquake' && magnitude < 2.5) {
                     // Don't post quarry blasts likely felt by no one
                     return;
