@@ -126,7 +126,7 @@ export default async () => {
                     // Don't post quarry blasts likely felt by no one
                     return;
                 } else if (time.isAfter(now.subtract(14.95, 'minute'))) {
-                    bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
+                    bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}
 For details from the USGS${subBleat}:`;
                     description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     if (lastPostID != undefined && id !== lastPostID) {
