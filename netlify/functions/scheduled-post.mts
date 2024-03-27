@@ -1,4 +1,4 @@
-import api from '@atproto/api';
+import api, { RichText } from '@atproto/api';
 import * as dotenv from 'dotenv';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -21,21 +21,14 @@ const agent = new BskyAgent({
 
 async function post(bleat: string, id: number, link: string, title: string, description: string) {
     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
-    await agent.post({
+    const richText = new RichText({
         text: bleat,
+    })
+    await richText.detectFacets(agent)
+    await agent.post({
+        text: richText.text,
         langs: [ "en-US" ],
-        facets: [
-            {
-                index: {
-                    byteStart: 0,
-                    byteEnd: 11
-                },
-                features: [{
-                    $type: 'app.bsky.richtext.facet#tag',
-                    tag: '#earthquake'
-                }]
-            }
-        ],
+        facets: richText.facets,
         embed: {
             "$type": "app.bsky.embed.external",
             "external": {
@@ -120,11 +113,20 @@ export default async () => {
                       depth = earthquake.geometry.coordinates[2],
                       significance = earthquake.properties.sig,
                       subBleat = (magnitude >= 2.5 ? ' and to report shaking': '');
+                let   category: string = '';
+                if (magnitude >= 8) { category = 'great'; } else
+                if (magnitude >= 7) { category = 'major'; } else
+                if (magnitude >= 6) { category = 'strong'; } else
+                if (magnitude >= 5) { category = 'moderate'; } else
+                if (magnitude >= 4) { category = 'light'; } else
+                if (magnitude >= 2.5) { category = 'minor'; } else
+                if (magnitude < 2.5) { category = 'micro'; } else
+                { return; }
                 if (type !== 'earthquake' && magnitude < 2.5) {
                     // Don't post quarry blasts likely felt by no one
                     return;
                 } else if (time.isAfter(now.subtract(14.95, 'minute'))) {
-                    bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}.
+                    bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}
 For details from the USGS${subBleat}:`;
                     description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                     if (lastPostID != undefined && id !== lastPostID) {
