@@ -1,4 +1,4 @@
-import api from '@atproto/api';
+import api, { RichText } from '@atproto/api';
 import * as dotenv from 'dotenv';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
@@ -21,21 +21,14 @@ const agent = new BskyAgent({
 
 async function post(bleat: string, id: number, link: string, title: string, description: string) {
     await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! })
-    await agent.post({
+    const richText = new RichText({
         text: bleat,
+    })
+    await richText.detectFacets(agent)
+    await agent.post({
+        text: richText.text,
         langs: [ "en-US" ],
-        facets: [
-            {
-                index: {
-                    byteStart: 0,
-                    byteEnd: 11
-                },
-                features: [{
-                    $type: 'app.bsky.richtext.facet#tag',
-                    tag: '#earthquake'
-                }]
-            }
-        ],
+        facets: richText.facets,
         embed: {
             "$type": "app.bsky.embed.external",
             "external": {
