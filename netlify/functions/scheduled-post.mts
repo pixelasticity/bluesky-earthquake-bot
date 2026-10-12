@@ -145,7 +145,7 @@ export default async () => {
             const subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
             const id = parseInt(earthquake.properties.code);
 
-            const bleatText = `#Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}\nFor details from the USGS${subBleat}:`;
+            const bleatText = `#Earthquake Update: A magnitude ${magnitude.toFixed(2)} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}\nFor details from the USGS${subBleat}:`;
             const description = `${time.format('YYYY-MM-DD HH:mm:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 
             if (!isNaN(id) && id !== lastPostID) {
