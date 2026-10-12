@@ -112,8 +112,8 @@ export default async () => {
     }
 
     // 2. Fetch USGS Data
-    let oneHourAgo = dayjs().subtract(60, 'minute');
-    let startTime = oneHourAgo.toISOString();
+    let lookbackHours = 3;
+    let startTime = dayjs().subtract(lookbackHours, 'hour').toISOString();
     const apiUrl = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&minmagnitude=1&latitude=34.14818&longitude=-118.27332&maxradiuskm=100&starttime=${startTime}`;
 
     try {
