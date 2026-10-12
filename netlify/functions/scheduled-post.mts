@@ -18,9 +18,9 @@ const agent = new BskyAgent({
     service: 'https://bsky.social',
 });
 
+// Updated post function: Removed login from here to avoid redundant API calls
 async function post(bleat: string, id: number, link: string, title: string, description: string) {
     try {
-        await agent.login({ identifier: process.env.BLUESKY_USERNAME!, password: process.env.BLUESKY_PASSWORD! });
         const richText = new RichText({
             text: bleat,
         });
@@ -38,10 +38,11 @@ async function post(bleat: string, id: number, link: string, title: string, desc
                 }
             }
         });
-        console.log(`Just posted quake ${id}!`);
+        console.log(`Successfully posted quake ${id}!`);
         lastPostID = id;
     } catch (error) {
-        console.error(`Failed to post quake ${id}:`, error);
+        console.error(`API Error: Failed to post quake ${id}:`, error);
+        throw error; // Re-throw so the main loop knows it failed
     }
 }
 
@@ -75,14 +76,22 @@ function getMagnitudeCategory(magnitude: number): string {
 
 export default async () => {
     dotenv.config();
-    console.log('Starting up...');
+    console.log('Starting scheduled earthquake check...');
 
-    const handle = 'earthquakesla.bsky.social';
+    // Use env var or fallback to default
+    const handle = process.env.BLUESKY_HANDLE || 'earthquakesla.bsky.social';
     const knownQuakes = new Set<string>();
 
-    // 1. Sync from Bluesky (Database-less persistence)
     try {
-        console.log('Syncing known quakes from Bluesky feed...');
+        // Login ONCE per execution
+        console.log('Authenticating with Bluesky...');
+        await agent.login({ 
+            identifier: process.env.BLUESKY_USERNAME!, 
+            password: process.env.BLUESKY_PASSWORD! 
+        });
+
+        // 1. Sync from Bluesky feed to prevent double-posting
+        console.log(`Syncing known quakes from feed: ${handle}...`);
         const postsRes = await agent.getAuthorFeed({ actor: handle });
         for (const item of postsRes.data.feed) {
             const embed = item.post?.embed;
@@ -95,9 +104,11 @@ export default async () => {
                 }
             }
         }
-        console.log(`Synced ${knownQuakes.size} quakes.`);
+        console.log(`Synced ${knownQuakes.size} existing quake IDs.`);
     } catch (error) {
-        console.error('Error syncing from Bluesky feed:', error);
+        console.error('Initialization Error (Auth/Sync):', error);
+        // If we can't login, we can't post, so we stop here.
+        return new Response("Internal Error during initialization", { status: 500 });
     }
 
     // 2. Fetch USGS Data
@@ -110,16 +121,16 @@ export default async () => {
         if (!response.ok) throw new Error(`USGS API error: ${response.status}`);
         
         const data = await response.json();
-        console.log(`Fetched ${data.features.length} potential earthquakes.`);
+        console.log(`USGS reports ${data.features.length} events in the last hour.`);
 
-        // 3. Process using for...of to handle async posting correctly
+        // 3. Process and Post
         for (const feature of data.features) {
             const earthquake = feature as Earthquake;
             const code = earthquake.id;
             const magnitude = earthquake.properties.mag;
             const type = earthquake.properties.type;
 
-            // Filter out quarry blasts and already posted quakes
+            // Skip quarry blasts and already posted quakes
             if (type !== 'earthquake' && magnitude < 2.5) continue;
             if (knownQuakes.has(code)) continue;
 
@@ -138,13 +149,14 @@ export default async () => {
             const description = `${time.format('YYYY-MM-DD HH:mm:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 
             if (!isNaN(id) && id !== lastPostID) {
+                console.log(`New quake detected (${code}). Posting...`);
                 await post(bleatText, id, link, title, description);
                 knownQuakes.add(code);
             }
         }
     } catch (error) {
-        console.error('Error processing earthquakes:', error);
+        console.error('Error during USGS processing loop:', error);
     }
 
-    return new Response("Ok");
+    return new Response("Check completed");
 };
