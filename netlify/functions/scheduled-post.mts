@@ -131,8 +131,14 @@ export default async () => {
             const type = earthquake.properties.type;
 
             // Skip quarry blasts and already posted quakes
-            if (type !== 'earthquake' && magnitude < 2.5) continue;
-            if (knownQuakes.has(code)) continue;
+            if (type !== 'earthquake' && magnitude < 2.5) {
+                console.log(`Skipping ${code}: Type is ${type} and magnitude ${magnitude} is too low.`);
+                continue;
+            }
+            if (knownQuakes.has(code)) {
+                console.log(`Skipping ${code}: Already posted to Bluesky.`);
+                continue;
+            }
 
             const time = dayjs(earthquake.properties.time).utc();
             const location = earthquake.properties.place;
