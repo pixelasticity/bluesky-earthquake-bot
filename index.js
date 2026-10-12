@@ -22,21 +22,44 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_1 = require("@atproto/api");
 const dotenv = __importStar(require("dotenv"));
 const cron_1 = require("cron");
 const process = __importStar(require("process"));
+const dayjs_1 = __importDefault(require("dayjs"));
+const utc_1 = __importDefault(require("dayjs/plugin/utc"));
+const timezone_1 = __importDefault(require("dayjs/plugin/timezone"));
+const localizedFormat_js_1 = __importDefault(require("dayjs/plugin/localizedFormat.js"));
+const promises_1 = require("fs/promises");
 dotenv.config();
-function TakeMinutesFromDate(date, minutes) {
-    return new Date(date.getTime() - minutes * 60000);
+dayjs_1.default.extend(utc_1.default);
+dayjs_1.default.extend(timezone_1.default);
+dayjs_1.default.extend(localizedFormat_js_1.default);
+const tz = "America/Los_Angeles";
+async function openFile(filePath, data) {
+    console.log(filePath);
+    try {
+        const file = await (0, promises_1.open)(filePath, 'w');
+        await file.read();
+        // await file.write(data);
+        console.log(`Opened file ${filePath}`);
+    }
+    catch (error) {
+        console.error(`Got an error trying to open the file: ${error.message}`);
+    }
 }
+let recentPosts = [];
 console.log('Starting up...');
 function apiFetch(fn) {
-    console.log('Fetching data from API: ', Date.now());
-    let now = new Date();
-    let fiveMinutesAgo = TakeMinutesFromDate(now, 120);
-    let startTime = fiveMinutesAgo.toISOString();
+    console.log('Fetching data @ %s \nLast post: %s', Date.now(), recentPosts);
+    let now = (0, dayjs_1.default)();
+    let fiveMinutesAgo = (0, dayjs_1.default)(now).subtract(1440, 'minute');
+    let startTime = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
+    openFile(__dirname + '/data/earthquake_ids.txt', 'Do homework');
     /*
      * Format: geoJSON
      * Minimum Magnitude: 1.0
@@ -65,12 +88,13 @@ function apiFetch(fn) {
             console.log(earthquake.id);
             let bleatText = "";
             let description = "";
-            const magnitude = earthquake.properties.mag, time = new Date(earthquake.properties.time), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2], subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
-            if (time >= TakeMinutesFromDate(now, 1)) {
-                bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.toLocaleTimeString('en-US')}.
+            const id = earthquake.id, magnitude = earthquake.properties.mag, time = (0, dayjs_1.default)(earthquake.properties.time).utc(), type = earthquake.properties.type, location = earthquake.properties.place, link = earthquake.properties.url, title = earthquake.properties.title, latitude = earthquake.geometry.coordinates[0], longitude = earthquake.geometry.coordinates[1], depth = earthquake.geometry.coordinates[2], subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
+            if (time.valueOf() >= (0, dayjs_1.default)().subtract(10, 'minute').valueOf()) {
+                bleatText = `Earthquake Update: A magnitude ${magnitude} ${type} took place ${location} at ${time.tz(tz)}.
 For details from the USGS${subBleat}:`;
-                description = `${time.toUTCString()} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
+                description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
                 post(bleatText, link, title, description);
+                recentPosts.push(id);
             }
         });
     })

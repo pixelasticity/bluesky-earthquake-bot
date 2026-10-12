@@ -2,6 +2,7 @@ import { BskyAgent } from '@atproto/api';
 import * as dotenv from 'dotenv';
 import { CronJob } from 'cron';
 import * as process from 'process';
+import fs from 'fs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -48,17 +49,17 @@ async function openFile(filePath, data) {
   }
 }
 
-let lastPost: string = "unknown";
+let recentPosts: string[] = [];
 
 console.log('Starting up...');
 
 type FetchFunction = (url: string) => void;
 function apiFetch(fn: FetchFunction) {
-	console.log('Fetching data @ %s \nLast post: %s', Date.now(), lastPost)
+	console.log('Fetching data @ %s \nLast post: %s', Date.now(), recentPosts)
 	let now = dayjs();
 	let fiveMinutesAgo = dayjs(now).subtract(1440, 'minute')
 	let startTime: string = fiveMinutesAgo != undefined ? fiveMinutesAgo.toISOString() : '';
-	openFile( __dirname + '/tmp/already-posted.json', 'Do homework' );
+	openFile( __dirname + '/data/earthquake_ids.txt', 'Do homework' );
 /*
  * Format: geoJSON
  * Minimum Magnitude: 1.0
@@ -86,7 +87,8 @@ function apiFetch(fn: FetchFunction) {
 			console.log(earthquake.id);
 			let bleatText = "";
 			let description = "";
-			const magnitude = earthquake.properties.mag,
+			const id = earthquake.id,
+						magnitude = earthquake.properties.mag,
 						time = dayjs(earthquake.properties.time).utc(),
 						type = earthquake.properties.type,
 						location = earthquake.properties.place,
@@ -101,6 +103,7 @@ function apiFetch(fn: FetchFunction) {
 For details from the USGS${subBleat}:`;
 					description = `${time.format('YYYY-MM-DD HH:MM:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 				post(bleatText, link, title, description);
+				recentPosts.push(id);
 			}
 		})
 	})
