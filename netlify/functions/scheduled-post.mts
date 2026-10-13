@@ -170,17 +170,29 @@ export default async () => {
             try {
                 const apiKey = process.env.GEOAPIFY_API_KEY;
                 const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright-smooth&center=lonlat%3A${longitude}%2C${latitude}&zoom=${zoom}&bearing=0&pitch=0&width=644&height=322&scaleFactor=1&marker=lonlat%3A${longitude}%2C${latitude}%3Bcolor%3A%23ff0000&apiKey=${apiKey}`;
+
+                console.log(`DEBUG: Requesting map from: ${mapUrl}`);
+
                 const imageResponse = await fetch(mapUrl);
+                console.log(`DEBUG: Map Response Status: ${imageResponse.status}`);
+
                 if (imageResponse.ok) {
                     // Convert the response into a binary Buffer
                     const arrayBuffer = await imageResponse.arrayBuffer();
+                    console.log(`DEBUG: Image Buffer Size: ${arrayBuffer.byteLength} bytes`);
+
                     const imageBuffer = Buffer.from(arrayBuffer);
+
+                    console.log('DEBUG: Uploading blob to Bluesky...');
                     const uploadResponse = await agent.uploadBlob(
                         (imageBuffer as unknown as Uint8Array), 
                         { encoding: 'binary' }
                     ) as any;
 
+                    console.log('DEBUG: Upload Response:', JSON.stringify(uploadResponse));
+
                     blobUri = uploadResponse.blob;
+                    console.log(`DEBUG: Final Blob URI: ${blobUri}`);
                 } else {
                     console.warn(`Map API returned ${imageResponse.status} for ${code}. Proceeding without image.`);
                 }
