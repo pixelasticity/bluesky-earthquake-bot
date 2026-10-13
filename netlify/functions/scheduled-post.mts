@@ -21,7 +21,7 @@ const agent = new BskyAgent({
 });
 
 // Updated post function: Removed login from here to avoid redundant API calls
-async function post(bleat: string, id: number, link: string, title: string, description: string, blobUri?: string) {
+async function post(bleat: string, id: number, link: string, title: string, description: string, blobUri?: string, altText?: string) {
     try {
         const richText = new RichText({
             text: bleat,
@@ -37,7 +37,8 @@ async function post(bleat: string, id: number, link: string, title: string, desc
                     "uri": link,
                     "title": title + " | " + id,
                     "description": description,
-                    thumb: blobUri
+                    "thumb": blobUri,
+                    "alt": altText
                 }
             }
         });
@@ -181,6 +182,7 @@ export default async () => {
                 console.error(`Image generation failed for ${code}:`, imgError);
                 console.warn(`Proceeding to post ${code} without an image.`);
             }
+            const altText = `Map showing the epicenter of a magnitude ${magnitude.toFixed(1)} earthquake at ${latitude.toFixed(3)}N, ${longitude.toFixed(3)}W. The map is zoomed to show the estimated felt area.`;
 
             const bleatText = `#Earthquake Update: A magnitude ${magnitude.toFixed(2)} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}\nFor details from the USGS${subBleat}:`;
             const description = `${time.format('YYYY-MM-DD HH:mm:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
@@ -193,7 +195,8 @@ export default async () => {
                     link as string,
                     title as string,
                     description as string,
-                    blobUri as string
+                    blobUri as string,
+                    altText as string
                 );
                 knownQuakes.add(code);
             }
