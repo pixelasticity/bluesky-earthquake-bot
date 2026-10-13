@@ -134,6 +134,12 @@ export default async () => {
             const magnitude = earthquake.properties.mag;
             const type = earthquake.properties.type;
 
+            // Guard against null magnitude
+            if (magnitude === null || magnitude === undefined) {
+                console.warn(`Skipping ${code}: Magnitude is missing.`);
+                continue;
+            }
+
             // Skip quarry blasts and already posted quakes
             if (type !== 'earthquake' && magnitude < 2.5) {
                 console.log(`Skipping ${code}: Type is ${type} and magnitude ${magnitude} is too low.`);
