@@ -211,5 +211,6 @@ export default async () => {
         console.error('Error during USGS processing loop:', error);
     }
 
+    console.log(`Check completed successfully at ${dayjs().format()}`);
     return new Response("Check completed");
 };
