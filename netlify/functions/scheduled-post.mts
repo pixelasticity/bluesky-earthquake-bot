@@ -5,6 +5,8 @@ import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import localizedFormat from 'dayjs/plugin/localizedFormat.js';
 import process from 'process';
+import { calculateFeltRadius } from '../../socalEarthquakeRadius.mjs';
+import { calculateZoom } from '../../radiusToZoom.mjs';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -19,7 +21,7 @@ const agent = new BskyAgent({
 });
 
 // Updated post function: Removed login from here to avoid redundant API calls
-async function post(bleat: string, id: number, link: string, title: string, description: string) {
+async function post(bleat: string, id: number, link: string, title: string, description: string, blobUri?: string) {
     try {
         const richText = new RichText({
             text: bleat,
@@ -35,6 +37,7 @@ async function post(bleat: string, id: number, link: string, title: string, desc
                     "uri": link,
                     "title": title + " | " + id,
                     "description": description,
+                    thumb: blobUri
                 }
             }
         });
@@ -147,16 +150,51 @@ export default async () => {
             const latitude = earthquake.geometry.coordinates[0];
             const longitude = earthquake.geometry.coordinates[1];
             const depth = earthquake.geometry.coordinates[2];
+            const TARGET_MMI = 2.5;
             const category = getMagnitudeCategory(magnitude);
             const subBleat = (magnitude >= 2.5 ? ' and to report shaking' : '');
             const id = parseInt(earthquake.properties.code);
+
+            const seismicData = calculateFeltRadius(magnitude, depth, TARGET_MMI);
+            const radius = seismicData.radius;
+            const zoom = calculateZoom(radius);
+
+            let blobUri: string | undefined = undefined;
+            try {
+                const apiKey = process.env.GEOAPIFY_API_KEY;
+                const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright-smooth&center=lonlat%3A${longitude}%2C${latitude}&zoom=${zoom}&bearing=0&pitch=0&width=644&height=322&scaleFactor=1&marker=lonlat%3A${longitude}%2C${latitude}%3Bcolor%3A%23ff0000&apiKey=${apiKey}`;
+                const imageResponse = await fetch(mapUrl);
+                if (imageResponse.ok) {
+                    // Convert the response into a binary Buffer
+                    const arrayBuffer = await imageResponse.arrayBuffer();
+                    const imageBuffer = Buffer.from(arrayBuffer);
+                    const uploadResponse = await agent.uploadBlob(
+                        (imageBuffer as unknown as Uint8Array), 
+                        { encoding: 'binary' }
+                    ) as any;
+
+                    blobUri = uploadResponse.blob;
+                } else {
+                    console.warn(`Map API returned ${imageResponse.status} for ${code}. Proceeding without image.`);
+                }
+            } catch (imgError) {
+                console.error(`Image generation failed for ${code}:`, imgError);
+                console.warn(`Proceeding to post ${code} without an image.`);
+            }
 
             const bleatText = `#Earthquake Update: A magnitude ${magnitude.toFixed(2)} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}\nFor details from the USGS${subBleat}:`;
             const description = `${time.format('YYYY-MM-DD HH:mm:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 
             if (!isNaN(id) && id !== lastPostID) {
                 console.log(`New quake detected (${code}). Posting...`);
-                await post(bleatText, id, link, title, description);
+                await post(
+                    bleatText,
+                    id as number,
+                    link as string,
+                    title as string,
+                    description as string,
+                    blobUri as string
+                );
                 knownQuakes.add(code);
             }
         }
