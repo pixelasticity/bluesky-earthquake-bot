@@ -202,7 +202,10 @@ export default async () => {
                     console.log('DEBUG: Uploading blob to Bluesky...');
                     const uploadResponse = await agent.uploadBlob(
                         (imageBuffer as unknown as Uint8Array), 
-                        { encoding: 'binary' }
+                        {
+                            encoding: 'binary',
+                            contentType: 'image/png',
+                        } as any
                     ) as any;
 
                     console.log('DEBUG: Upload Response:', JSON.stringify(uploadResponse));
