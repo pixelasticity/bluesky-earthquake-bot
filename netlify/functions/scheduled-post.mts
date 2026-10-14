@@ -27,20 +27,33 @@ async function post(bleat: string, id: number, link: string, title: string, desc
             text: bleat,
         });
         await richText.detectFacets(agent);
+
+        // EXPLICIT EMBED CONSTRUCTION: Fixes the image-missing bug
+        const embed: any = {
+            "$type": 'app.bsky.embed.external',
+            "external": {
+                "uri": link,
+                "title": title + ' | ' + id,
+                "description": description,
+            }
+        };
+
+        // Only attach the thumbnail and alt text if they were successfully generated
+        if (blobUri) {
+            embed.external.thumb = blobUri;
+            if (altText) {
+                embed.external.alt = altText;
+            }
+            console.log(`Attaching image blob: ${blobUri}`);
+        } else {
+            console.warn(`Failed to attach image blob: ${blobUri}`);
+        }
+
         await agent.post({
             text: richText.text,
             langs: ["en-US"],
             facets: richText.facets,
-            embed: {
-                "$type": "app.bsky.embed.external",
-                "external": {
-                    "uri": link,
-                    "title": title + " | " + id,
-                    "description": description,
-                    "thumb": blobUri,
-                    "alt": altText
-                }
-            }
+            embed: embed
         });
         console.log(`Successfully posted quake ${id}!`);
         lastPostID = id;
@@ -172,8 +185,11 @@ export default async () => {
                 const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright-smooth&center=lonlat%3A${longitude}%2C${latitude}&zoom=${zoom}&bearing=0&pitch=0&width=644&height=322&scaleFactor=1&marker=lonlat%3A${longitude}%2C${latitude}%3Bcolor%3A%23ff0000&apiKey=${apiKey}`;
 
                 console.log(`DEBUG: Requesting map from: ${mapUrl}`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-                const imageResponse = await fetch(mapUrl);
+                const imageResponse = await fetch(mapUrl, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 console.log(`DEBUG: Map Response Status: ${imageResponse.status}`);
 
                 if (imageResponse.ok) {
