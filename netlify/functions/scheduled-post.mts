@@ -203,14 +203,13 @@ export default async () => {
                     const uploadResponse = await agent.uploadBlob(
                         (imageBuffer as unknown as Uint8Array), 
                         {
-                            encoding: 'binary',
-                            contentType: 'image/png',
+                            encoding: 'image/png',
                         } as any
                     ) as any;
 
                     console.log('DEBUG: Upload Response:', JSON.stringify(uploadResponse));
 
-                    blobUri = uploadResponse.blob;
+                    blobUri = uploadResponse.data.blob;
                     console.log(`DEBUG: Final Blob URI: ${blobUri}`);
                 } else {
                     console.warn(`Map API returned ${imageResponse.status} for ${code}. Proceeding without image.`);
