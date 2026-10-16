@@ -188,7 +188,10 @@ export default async () => {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 5000)
 
-                const imageResponse = await fetch(mapUrl, { signal: controller.signal });
+                const imageResponse = await fetch(mapUrl, {
+                    headers: { 'User-Agent': 'Mozilla/5.0...' }, 
+                    signal: controller.signal
+                });
                 clearTimeout(timeoutId);
                 console.log(`DEBUG: Map Response Status: ${imageResponse.status}`);
 
@@ -201,15 +204,15 @@ export default async () => {
 
                     console.log('DEBUG: Uploading blob to Bluesky...');
                     const uploadResponse = await agent.uploadBlob(
-                        (imageBuffer as unknown as Uint8Array), 
+                        imageBuffer as unknown as Uint8Array, 
                         {
-                            encoding: 'image/png',
+                            encoding: 'image/jpeg',
                         } as any
                     ) as any;
 
                     console.log('DEBUG: Upload Response:', JSON.stringify(uploadResponse));
 
-                    blobUri = uploadResponse.data.blob;
+                    blobUri = uploadResponse.data.blob.ref.$link;
                     console.log(`DEBUG: Final Blob URI: ${blobUri}`);
                 } else {
                     console.warn(`Map API returned ${imageResponse.status} for ${code}. Proceeding without image.`);
@@ -223,7 +226,7 @@ export default async () => {
             const bleatText = `#Earthquake Update: A magnitude ${magnitude.toFixed(2)} ${type} took place ${location} at ${time.tz(tz).format('LTS')}. #${category}\nFor details from the USGS${subBleat}:`;
             const description = `${time.format('YYYY-MM-DD HH:mm:ss [(UTC)]')} | ${latitude.toFixed(3)}°N ${longitude.toFixed(3)}°W | ${depth.toFixed(1)} km depth`;
 
-            if (!isNaN(id) && id !== lastPostID) {
+            if (!isNaN(id) && !knownQuakes.has(code)) {
                 console.log(`New quake detected (${code}). Posting...`);
                 await post(
                     bleatText,
@@ -231,7 +234,7 @@ export default async () => {
                     link as string,
                     title as string,
                     description as string,
-                    blobUri as string,
+                    blobUri,
                     altText as string
                 );
                 knownQuakes.add(code);
