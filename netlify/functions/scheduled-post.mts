@@ -212,7 +212,7 @@ export default async () => {
 
                     console.log('DEBUG: Upload Response:', JSON.stringify(uploadResponse));
 
-                    blobUri = uploadResponse.data.blob.ref.$link;
+                    blobUri = uploadResponse.data.blob;
                     console.log(`DEBUG: Final Blob URI: ${blobUri}`);
                 } else {
                     console.warn(`Map API returned ${imageResponse.status} for ${code}. Proceeding without image.`);
